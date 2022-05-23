@@ -47,6 +47,7 @@ class DiskConnector:
     def back(self, bot, message):
         message_to_back = message.text
         if message_to_back == 'Назад в меню':
+            change_list.clear()
             return message_to_back
         else:
             return False
@@ -58,21 +59,20 @@ class DiskConnector:
             return message_to_save_choose
         else:
             return False
-    def for_choose_list_1(self):
+    def for_change_list_1(self):
         keyword = ['Замена', 'Изменение времени смены']
-        return list(set(keyword) & set(choose_list))
+        if change_list[0] in keyword:
+            return True
+        else:
+            return False
 
-    def for_choose_list_2(self):
+    def for_change_list_2(self):
         keyword = ['Замена']
-        return list(set(keyword) & set(choose_list))
+        if change_list[0] in keyword:
+            return True
+        else:
+            return False
 
-    def choose_list_append(self, to_choose_list):
-        choose_list.append(to_choose_list)
-        return choose_list
-
-    def choose_list_clear(self):
-        choose_list.clear()
-        return choose_list
 
     def change_list(self, upload_result):
         change_list.append(upload_result)
@@ -83,29 +83,29 @@ class DiskConnector:
         return change_list
 
     def to_send_message(self, change_list_view):
-        if len(change_list_view) == 4:
-            date = change_list_view[0]
-            number = change_list_view[1]
-            fio = change_list_view[2]
-            place = change_list_view[3]
-            send_view =  f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\n'
-            return send_view
-        elif len(change_list_view) == 5:
-            date = change_list_view[0]
-            time = change_list_view[1]
+        if len(change_list_view) == 5:
+            date = change_list_view[1]
             number = change_list_view[2]
             fio = change_list_view[3]
             place = change_list_view[4]
+            send_view =  f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\n'
+            return send_view
+        elif len(change_list_view) == 6:
+            date = change_list_view[1]
+            time = change_list_view[2]
+            number = change_list_view[3]
+            fio = change_list_view[4]
+            place = change_list_view[5]
             send_view =  f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\n'
             return send_view
-        elif len(change_list_view) == 7:
-            date = change_list_view[0]
-            time = change_list_view[1]
-            number = change_list_view[2]
-            fio = change_list_view[3]
-            number_work = change_list_view[4]
-            fio_work = change_list_view[5]
-            shop = change_list_view[6]
+        elif len(change_list_view) == 8:
+            date = change_list_view[1]
+            time = change_list_view[2]
+            number = change_list_view[3]
+            fio = change_list_view[4]
+            number_work = change_list_view[5]
+            fio_work = change_list_view[6]
+            shop = change_list_view[7]
             send_view = f'Замена\nДата: {date}\nВремя: {time}\nБейдж сотрудника, у которого выходной: {number}\nСотрудник, у которого выходной: {fio}\nБейдж сотрудника, у которого выходной: {number_work}\nСотрудник, у которого выходной: {fio_work}\nМагазин: {shop}\n'
             return send_view
         else:
