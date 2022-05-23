@@ -1,4 +1,5 @@
 change_list = []
+choose_list = []
 class DiskConnector:
     def __init__(self):
         pass
@@ -54,13 +55,27 @@ class DiskConnector:
         keyword = {1: 'Замена', 2: 'Изменение времени смены', 3: 'Установить выходной день'}
         message_to_save_choose = message.text
         if message_to_save_choose in keyword.values():
-            print(message_to_save_choose)
             return message_to_save_choose
         else:
             return False
+    def for_choose_list_1(self):
+        keyword = ['Замена', 'Изменение времени смены']
+        return list(set(keyword) & set(choose_list))
 
-    def change_list(self, upload):
-        change_list.append(upload)
+    def for_choose_list_2(self):
+        keyword = ['Замена']
+        return list(set(keyword) & set(choose_list))
+
+    def choose_list_append(self, to_choose_list):
+        choose_list.append(to_choose_list)
+        return choose_list
+
+    def choose_list_clear(self):
+        choose_list.clear()
+        return choose_list
+
+    def change_list(self, upload_result):
+        change_list.append(upload_result)
         return change_list
 
     def change_list_clear(self):

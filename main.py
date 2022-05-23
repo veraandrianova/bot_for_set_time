@@ -3,7 +3,6 @@ from telebot import types
 from config import id_chanel, token
 from connector import DiskConnector
 bot = telebot.TeleBot(token)
-choose = []
 test = DiskConnector()
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -15,16 +14,15 @@ def start(message):
     bot.send_message(message.chat.id, 'Выберите параметр!', reply_markup=menu)
 
 @bot.message_handler(func=lambda m: True)
-# @bot.message_handler(func=lambda m: m.text == 'Замена')
 def change(message):
     if not test.upload_choose(bot, message):
         test.back(bot, message)
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     elif test.upload_choose(bot, message):
-        choose.append(message.text)
-        print(choose)
+        to_choose_list = test.upload_choose(bot, message)
+        test.choose_list_append(to_choose_list)
         catalog_keyboard = types.ReplyKeyboardMarkup(row_width = 1, resize_keyboard=True)
         back_button = types.KeyboardButton(text='Назад в меню')
         catalog_keyboard.add(back_button)
@@ -34,20 +32,20 @@ def change(message):
 @bot.message_handler(func=lambda m: m.text == 'Назад в меню')
 def back(message):
     test.back(bot, message)
-    choose.clear()
+    test.choose_list_clear()
     test.change_list_clear()
     start(message)
 
 def date(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
         if test.upload_date(bot, message):
             upload_result = test.upload_date(bot, message)
             test.change_list(upload_result)
-            if (choose[0] in 'Замена') or (choose[0] in 'Изменение времени смены'):
+            if test.for_choose_list_1():
                 sent_2 = bot.reply_to(message, 'Пожалуйста, введите время смены. 10:00-23:00 с указанием часов и минут')
                 bot.register_next_step_handler(sent_2, time)
             else:
@@ -59,14 +57,14 @@ def date(message):
 
 def time(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
         if test.upload_time(bot, message):
             upload_result = test.upload_time(bot, message)
             test.change_list(upload_result)
-            if (choose[0] in 'Замена') or (choose[0] in 'Изменение времени смены'):
+            if test.for_choose_list_1():
                 sent_2 = bot.reply_to(message, 'Пожалуйста, свой бейдж сотрудника! 01234')
                 bot.register_next_step_handler(sent_2, number_myself)
             else:
@@ -79,14 +77,14 @@ def time(message):
 
 def number_myself(message):
      if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
      else:
          if test.upload_number(bot, message):
             upload_result = test.upload_number(bot, message)
             test.change_list(upload_result)
-            if (choose[0] in 'Замена') or (choose[0] in 'Изменение времени смены'):
+            if test.for_choose_list_1():
                 sent_3 = bot.reply_to(message, 'Пожалуйста, укажите свою Фамилию и Имя! Иванова Анна')
                 bot.register_next_step_handler(sent_3, fio_no_work)
             else:
@@ -99,13 +97,13 @@ def number_myself(message):
 
 def fio_no_work(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
         upload_result = message.text
         test.change_list(upload_result)
-        if (choose[0] in 'Замена'):
+        if test.for_choose_list_2():
             sent_2 = bot.reply_to(message, 'Пожалуйста, бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ! 012345')
             bot.register_next_step_handler(sent_2, number_to_change)
         else:
@@ -115,7 +113,7 @@ def fio_no_work(message):
 
 def number_to_change(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
@@ -130,7 +128,7 @@ def number_to_change(message):
 
 def fio_to_work(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
@@ -141,7 +139,7 @@ def fio_to_work(message):
 
 def place(message):
     if test.back(bot, message):
-        choose.clear()
+        test.choose_list_clear()
         test.change_list_clear()
         start(message)
     else:
@@ -152,7 +150,7 @@ def place(message):
             send = test.to_send_message(change_list_view)
             bot.send_message(id_chanel, send)
         test.change_list_clear()
-        choose.clear()
+        test.choose_list_clear()
         start(message)
 
 #
