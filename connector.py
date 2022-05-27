@@ -83,34 +83,40 @@ class DiskConnector:
         return change_list
 
     def to_send_message(self, change_list_view):
-        # if len(change_list_view) == 6:
-        #     date = change_list_view[1]
-        #     number = change_list_view[2]
-        #     fio = change_list_view[3]
-        #     place = change_list_view[4]
-        #     comments = change_list_view[5]
-        #     send_view = f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
-        #     return change_list_view
-        # elif len(change_list_view) == 7:
-        #     date = change_list_view[1]
-        #     time = change_list_view[2]
-        #     number = change_list_view[3]
-        #     fio = change_list_view[4]
-        #     place = change_list_view[5]
-        #     comments = change_list_view[6]
-        #     send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
-        #     return change_list_view
-        # elif len(change_list_view) == 9:
-        #     date = change_list_view[1]
-        #     time = change_list_view[2]
-        #     number = change_list_view[3]
-        #     fio = change_list_view[4]
-        #     number_work = change_list_view[5]
-        #     fio_work = change_list_view[6]
-        #     place = change_list_view[7]
-        #     comments = change_list_view[8]
-        #     send_view = f'Замена\nДата: {date}\nВремя: {time}\nБейдж сотрудника, у которого выходной: {number}\nСотрудник, у которого выходной: {fio}\nБейдж сотрудника, который будет работать: {number_work}\nСотрудник, который будет работать: {fio_work}\nМагазин: {place}\nКомментарии: {comments}\n'
-            return change_list_view
-        # else:
-        #     return False
+        if len(change_list_view) == 6:
+            f = change_list_view[0]
+            date = change_list_view[1]
+            number = change_list_view[2]
+            fio = change_list_view[3]
+            place = change_list_view[4]
+            comments = change_list_view[5]
+            #send_view = f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f'{f}, {date}, {number}'
+            return send_view
+        elif len(change_list_view) == 7:
+            f = change_list_view[0]
+            date = change_list_view[1]
+            time = change_list_view[2]
+            number = change_list_view[3]
+            fio = change_list_view[4]
+            place = change_list_view[5]
+            comments = change_list_view[6]
+            # send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f'{f}, {date}, {time}'
+            return send_view
+        elif len(change_list_view) == 9:
+            f = change_list_view[0]
+            date = change_list_view[1]
+            time = change_list_view[2]
+            number = change_list_view[3]
+            fio = change_list_view[4]
+            number_work = change_list_view[5]
+            fio_work = change_list_view[6]
+            place = change_list_view[7]
+            comments = change_list_view[8]
+            #send_view = f'Замена\nДата: {date}\nВремя: {time}\nБейдж сотрудника, у которого выходной: {number}\nСотрудник, у которого выходной: {fio}\nБейдж сотрудника, который будет работать: {number_work}\nСотрудник, который будет работать: {fio_work}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f'{f}, {date}, {time}'
+            return send_view
+        else:
+            return False
 
