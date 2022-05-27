@@ -89,7 +89,7 @@ class DiskConnector:
             fio = change_list_view[3]
             place = change_list_view[4]
             comments = change_list_view[5]
-            send_view =  f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
             return send_view
         elif len(change_list_view) == 7:
             date = change_list_view[1]
@@ -98,7 +98,7 @@ class DiskConnector:
             fio = change_list_view[4]
             place = change_list_view[5]
             comments = change_list_view[6]
-            send_view =  f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
             return send_view
         elif len(change_list_view) == 9:
             date = change_list_view[1]
