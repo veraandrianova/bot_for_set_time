@@ -9,6 +9,7 @@ test = DiskConnector()
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    test.change_list_clear()
     menu = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
     change_button = types.KeyboardButton(text='Замена')
     change_time_button = types.KeyboardButton(text='Изменение времени смены')
