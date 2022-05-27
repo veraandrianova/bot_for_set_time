@@ -90,7 +90,8 @@ class DiskConnector:
             fio = change_list_view[3]
             place = change_list_view[4]
             comments = change_list_view[5]
-            send_view = f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            #send_view = f'Выходной\nДата: {date}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f"{f}, {date}, {number}"
             return send_view
         elif len(change_list_view) == 7:
             f = change_list_view[0]
@@ -100,7 +101,8 @@ class DiskConnector:
             fio = change_list_view[4]
             place = change_list_view[5]
             comments = change_list_view[6]
-            send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f"{f}, {date}, {time}"
+            #send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
             return send_view
         elif len(change_list_view) == 9:
             f = change_list_view[0]
@@ -112,7 +114,8 @@ class DiskConnector:
             fio_work = change_list_view[6]
             place = change_list_view[7]
             comments = change_list_view[8]
-            send_view = f'Замена\nДата: {date}\nВремя: {time}\nБейдж сотрудника, у которого выходной: {number}\nСотрудник, у которого выходной: {fio}\nБейдж сотрудника, который будет работать: {number_work}\nСотрудник, который будет работать: {fio_work}\nМагазин: {place}\nКомментарии: {comments}\n'
+            send_view = f"{f}, {date}, {time}"
+            #send_view = f'Замена\nДата: {date}\nВремя: {time}\nБейдж сотрудника, у которого выходной: {number}\nСотрудник, у которого выходной: {fio}\nБейдж сотрудника, который будет работать: {number_work}\nСотрудник, который будет работать: {fio_work}\nМагазин: {place}\nКомментарии: {comments}\n'
             return send_view
         else:
             return False
