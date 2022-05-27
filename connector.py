@@ -102,7 +102,7 @@ class DiskConnector:
             comments = change_list_view[6]
             send_view = f'Изменение времени смены\nДата: {date}\nВремя: {time}\nБейдж: {number}\nСотрудник: {fio}\nМагазин: {place}\nКомментарии: {comments}\n'
             return send_view
-        elif len(change_list_view) == 9:
+        elif len(change_list_view) >= 9:
             f = change_list_view[0]
             date = change_list_view[1]
             time = change_list_view[2]
