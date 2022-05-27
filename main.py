@@ -28,7 +28,7 @@ def change(message):
         catalog_keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         back_button = types.KeyboardButton(text='Назад в меню')
         catalog_keyboard.add(back_button)
-        sent_1 = bot.reply_to(message, 'Пожалуйста, оставьте дату. 01.01', reply_markup=catalog_keyboard)
+        sent_1 = bot.reply_to(message, 'Пожалуйста, укажите дату замены: 01.01', reply_markup=catalog_keyboard)
         bot.register_next_step_handler(sent_1, date)
 
 
@@ -46,13 +46,13 @@ def date(message):
             upload_result = test.upload_date(bot, message)
             test.change_list(upload_result)
             if test.for_change_list_1():
-                sent_2 = bot.reply_to(message, 'Пожалуйста, введите время смены. 10:00-23:00 с указанием часов и минут')
+                sent_2 = bot.reply_to(message, 'Пожалуйста, введите время смены с указанием часов и минут: 10:00-23:00')
                 bot.register_next_step_handler(sent_2, time)
             else:
-                sent_2 = bot.reply_to(message, 'Пожалуйста, свой бейдж сотрудника! 123456')
+                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свой бейдж сотрудника! 123456')
                 bot.register_next_step_handler(sent_2, number_myself)
         else:
-            sent_5 = bot.reply_to(message, 'Пожалуйста, введите корректно корректно даты! 01.01')
+            sent_5 = bot.reply_to(message, 'Пожалуйста, введите корректно дату замены! 01.01')
             bot.register_next_step_handler(sent_5, date)
 
 
@@ -64,7 +64,7 @@ def time(message):
             upload_result = test.upload_time(bot, message)
             test.change_list(upload_result)
             if test.for_change_list_1():
-                sent_2 = bot.reply_to(message, 'Пожалуйста, свой бейдж сотрудника! 01234')
+                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свой бейдж сотрудника! 01234')
                 bot.register_next_step_handler(sent_2, number_myself)
             else:
                 sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свою Фамилию и Имя! Иванова Анна')
@@ -90,7 +90,7 @@ def number_myself(message):
                 bot.register_next_step_handler(sent_2, fio_no_work)
 
         else:
-            sent_3 = bot.reply_to(message, 'Пожалуйста, введите корректно табельный номер. 012345')
+            sent_3 = bot.reply_to(message, 'Пожалуйста, введите корректно бейдж сотрудника. 012345')
             bot.register_next_step_handler(sent_3, number_myself)
 
 
@@ -101,10 +101,10 @@ def fio_no_work(message):
         upload_result = message.text
         test.change_list(upload_result)
         if test.for_change_list_2():
-            sent_2 = bot.reply_to(message, 'Пожалуйста, бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ! 012345')
+            sent_2 = bot.reply_to(message, 'Пожалуйста, укажите бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ! 012345')
             bot.register_next_step_handler(sent_2, number_to_change)
         else:
-            sent_2 = bot.reply_to(message, 'Пожалуйста, напишите магазин! Мега Теплый стан')
+            sent_2 = bot.reply_to(message, 'Пожалуйста, укажите магазин! Мега Теплый стан')
             bot.register_next_step_handler(sent_2, place)
 
 
@@ -120,7 +120,7 @@ def number_to_change(message):
             bot.register_next_step_handler(sent_3, fio_to_work)
         else:
             sent_3 = bot.reply_to(message,
-                                  'Пожалуйста, введите корректно табельный номер, сотрудника КОТОРЫЙ БУДЕТ РАБОТАТЬ. 123456')
+                                  'Пожалуйста, введите корректно бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ. 123456')
             bot.register_next_step_handler(sent_3, number_to_change)
 
 
@@ -130,11 +130,20 @@ def fio_to_work(message):
     else:
         upload_result = message.text
         test.change_list(upload_result)
-        sent_3 = bot.reply_to(message, 'Пожалуйста, напишите магазин! Мега Теплый стан')
+        sent_3 = bot.reply_to(message, 'Пожалуйста, укажите магазин! Мега Теплый стан')
         bot.register_next_step_handler(sent_3, place)
 
 
 def place(message):
+    if test.back(bot, message):
+        start(message)
+    else:
+        upload_result = message.text
+        test.change_list(upload_result)
+        sent_3 = bot.reply_to(message, 'Пожалуйста, укажите комментарий к изменениям в графике, если комментариев нет - напишите "нет"')
+        bot.register_next_step_handler(sent_3, comments)
+
+def comments(message):
     if test.back(bot, message):
         start(message)
     else:
@@ -147,7 +156,6 @@ def place(message):
             bot.send_message(id_chanel, send)
         test.change_list_clear()
         start(message)
-
 
 if __name__ == '__main__':
     bot.polling(none_stop=True)
