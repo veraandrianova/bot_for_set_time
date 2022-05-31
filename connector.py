@@ -1,10 +1,9 @@
 change_list = []
 choose_list = []
 class DiskConnector:
-    def __init__(self, chat_id, first_name, last_name):
-            self.chat_id = chat_id
-            self.first_name = first_name
-            self.last_name = last_name
+    def __init__(self):
+           pass
+
 
     def upload_date(self, bot, message):
         total = []
