@@ -1,4 +1,4 @@
-import dp
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils import executor
