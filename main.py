@@ -1,162 +1,301 @@
-from telebot import TeleBot, types
-
+import dp
+from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.utils import executor
+from user import UserState
+import keyboards as kb
 from config import id_chanel, token
-from connector import DiskConnector
+from loader import bot, dp, test, storage
+from messages import MESSAGES
 
-bot = TeleBot(token)
-test = DiskConnector()
+@dp.message_handler(commands=['start'])
+async def start(message: types.Message):
+    await message.answer(MESSAGES['start'], reply_markup=kb.menu)
 
-
-@bot.message_handler(commands=['start'])
-def start(message):
-    test.change_list_clear()
-    menu = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-    change_button = types.KeyboardButton(text='Замена')
-    change_time_button = types.KeyboardButton(text='Изменение времени смены')
-    up_date_weekend_button = types.KeyboardButton(text='Установить выходной день')
-    menu.add(change_button, change_time_button, up_date_weekend_button)
-    bot.send_message(message, 'Выберите параметр!', reply_markup=menu)
-
-
-@bot.message_handler(func=lambda m: True)
-def change(message):
-    if not test.upload_choose(bot, message):
-        test.back(bot, message)
-        start(message)
-    elif test.upload_choose(bot, message):
-        upload_result = test.upload_choose(bot, message)
-        test.change_list(upload_result)
+@dp.message_handler()
+async def client_choose(message: types.Message):
+    if message.text == 'Замена':
+        await message.answer(MESSAGES['choose_day_change'], reply_markup=kb.catalog_keyboard)
+        await UserState.date_to_change.set()
+    elif message.text == 'Изменение времени смены':
         catalog_keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         back_button = types.KeyboardButton(text='Назад в меню')
         catalog_keyboard.add(back_button)
-        sent_1 = bot.reply_to(message, 'Пожалуйста, укажите дату замены: 01.01', reply_markup=catalog_keyboard)
-        bot.register_next_step_handler(sent_1, date)
+        await message.answer(MESSAGES['choose_day_change'], reply_markup=kb.catalog_keyboard)
+        await UserState.date_to_change_time.set()
+    elif message.text == 'Установить выходной день':
+        catalog_keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+        back_button = types.KeyboardButton(text='Назад в меню')
+        catalog_keyboard.add(back_button)
+        await message.answer(MESSAGES['choose_day_change'], reply_markup=kb.catalog_keyboard)
+        await UserState.date_to_day_off.set()
 
 
-@bot.message_handler(func=lambda m: m.text == 'Назад в меню')
-def back(message):
-    test.back(bot, message)
-    start(message)
-
-
-def date(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.date_to_change)
+async def get_date(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_date(bot, message):
+        upload_result = test.upload_date(bot, message)
+        await state.update_data(date_to_change=upload_result)
+        await message.answer(MESSAGES['choose_time_change'])
+        await UserState.time_to_change.set()
     else:
-        if test.upload_date(bot, message):
-            upload_result = test.upload_date(bot, message)
-            test.change_list(upload_result)
-            if test.for_change_list_1():
-                sent_2 = bot.reply_to(message, 'Пожалуйста, введите время смены с указанием часов и минут: 10:00-23:00')
-                bot.register_next_step_handler(sent_2, time)
-            else:
-                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свой бейдж сотрудника! 123456')
-                bot.register_next_step_handler(sent_2, number_myself)
-        else:
-            sent_5 = bot.reply_to(message, 'Пожалуйста, введите корректно дату замены! 01.01')
-            bot.register_next_step_handler(sent_5, date)
+        await message.answer(MESSAGES['choose_day_change_correct'])
+        await UserState.date_to_change.set()
 
 
-def time(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.time_to_change)
+async def get_time(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_time(bot, message):
+        upload_result = test.upload_time(bot, message)
+        await state.update_data(time_to_change=upload_result)
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_change.set()
     else:
-        if test.upload_time(bot, message):
-            upload_result = test.upload_time(bot, message)
-            test.change_list(upload_result)
-            if test.for_change_list_1():
-                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свой бейдж сотрудника! 01234')
-                bot.register_next_step_handler(sent_2, number_myself)
-            else:
-                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свою Фамилию и Имя! Иванова Анна')
-                bot.register_next_step_handler(sent_2, fio_no_work)
-
-        else:
-            sent_5 = bot.reply_to(message, 'Пожалуйста, введите корректно время! 10:00-23:00')
-            bot.register_next_step_handler(sent_5, time)
+        await message.answer(MESSAGES['choose_time_change'])
+        await UserState.time_to_change.set()
 
 
-def number_myself(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.number_to_change)
+async def get_number(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_number(bot, message):
+        upload_result = test.upload_number(bot, message)
+        await state.update_data(number_to_change=upload_result)
+        await message.answer(MESSAGES['choose_fio_change'])
+        await UserState.fio_to_change.set()
     else:
-        if test.upload_number(bot, message):
-            upload_result = test.upload_number(bot, message)
-            test.change_list(upload_result)
-            if test.for_change_list_1():
-                sent_3 = bot.reply_to(message, 'Пожалуйста, укажите свою Фамилию и Имя! Иванова Анна')
-                bot.register_next_step_handler(sent_3, fio_no_work)
-            else:
-                sent_2 = bot.reply_to(message, 'Пожалуйста, укажите свою Фамилию и Имя! Иванова Анна')
-                bot.register_next_step_handler(sent_2, fio_no_work)
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_change.set()
 
-        else:
-            sent_3 = bot.reply_to(message, 'Пожалуйста, введите корректно бейдж сотрудника. 012345')
-            bot.register_next_step_handler(sent_3, number_myself)
-
-
-def fio_no_work(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.fio_to_change)
+async def get_fio(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
     else:
-        upload_result = message.text
-        test.change_list(upload_result)
-        if test.for_change_list_2():
-            sent_2 = bot.reply_to(message, 'Пожалуйста, укажите бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ! 012345')
-            bot.register_next_step_handler(sent_2, number_to_change)
-        else:
-            sent_2 = bot.reply_to(message, 'Пожалуйста, укажите магазин! Мега Теплый стан')
-            bot.register_next_step_handler(sent_2, place)
+        await state.update_data(fio_to_change=message.text)
+        await message.answer(MESSAGES['choose_number_to_work_change'])
+        await UserState.number_to_work.set()
 
-
-def number_to_change(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.number_to_work)
+async def get_number_to_work(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_number(bot, message):
+        upload_result = test.upload_number(bot, message)
+        await state.update_data(number_to_work=upload_result)
+        await message.answer(MESSAGES['choose_fio_to_work_change'])
+        await UserState.fio_to_work.set()
     else:
-        if test.upload_number(bot, message):
-            upload_result = test.upload_number(bot, message)
-            test.change_list(upload_result)
-            sent_3 = bot.reply_to(message,
-                                  'Пожалуйста, укажите Фамилию и Имя сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ! Иванова Анна')
-            bot.register_next_step_handler(sent_3, fio_to_work)
-        else:
-            sent_3 = bot.reply_to(message,
-                                  'Пожалуйста, введите корректно бейдж сотрудника, КОТОРЫЙ БУДЕТ РАБОТАТЬ. 123456')
-            bot.register_next_step_handler(sent_3, number_to_change)
+        await message.answer(MESSAGES['choose_number_to_work_change'])
+        await UserState.number_to_work.set()
 
 
-def fio_to_work(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.fio_to_work)
+async def get_fio_to_work(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
     else:
-        upload_result = message.text
-        test.change_list(upload_result)
-        sent_3 = bot.reply_to(message, 'Пожалуйста, укажите магазин! Мега Теплый стан')
-        bot.register_next_step_handler(sent_3, place)
+        await state.update_data(fio_to_work=message.text)
+        await message.answer(MESSAGES['choose_place'])
+        await UserState.place_to_change.set()
 
-
-def place(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.place_to_change)
+async def get_place(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
     else:
-        upload_result = message.text
-        test.change_list(upload_result)
-        sent_3 = bot.reply_to(message, 'Пожалуйста, укажите комментарий к изменениям в графике, если комментариев нет - напишите "нет"')
-        bot.register_next_step_handler(sent_3, comments)
+        await state.update_data(place_to_work=message.text)
+        await message.answer(MESSAGES['get_comments'])
+        await UserState.comments_to_change.set()
 
-def comments(message):
-    if test.back(bot, message):
-        start(message)
+@dp.message_handler(state=UserState.comments_to_change)
+async def get_comments(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
     else:
-        upload_result = message.text
-        change_list_view = test.change_list(upload_result)
-        bot.send_message(message,
-                         'Обращение создано. Статус можно проверить перейдя по ссылке https://t.me/testpython100')
-        if test.to_send_message(change_list_view):
-            send = test.to_send_message(change_list_view)
-            bot.send_message(id_chanel, send)
-        test.change_list_clear()
-        start(message)
+        await state.update_data(comments=message.text)
+        data = await state.get_data()
+        await message.answer(MESSAGES['to_chat_send_message'])
+        await bot.send_message(id_chanel, f"Замена\n"
+                             f"Дата: {data['date_to_change']}\n"
+                             f"Время: {data['time_to_change']}\n"
+                             f"Бейдж сотрудника, у которого выходной: {data['number_to_change']}\n"
+                             f"Сотрудник, у которого выходной: {data['fio_to_change']}\n"
+                             f"Бейдж сотрудника, который будет работать: {data['number_to_work']}\n"
+                             f"Сотрудник, который будет работать: {data['fio_to_work']}\n"
+                             f"Магазин: {data['place_to_work']}\n"
+                             f"Комментарии: {data['comments']}\n")
+        await state.finish()
+        await start(message)
+
+@dp.message_handler(state=UserState.date_to_change_time)
+async def get_date(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_date(bot, message):
+        upload_result = test.upload_date(bot, message)
+        await state.update_data(date_to_change_time=upload_result)
+        await message.answer(MESSAGES['choose_time_change'])
+        await UserState.time_to_change_time.set()
+    else:
+        await message.answer(MESSAGES['choose_day_change_correct'])
+        await UserState.date_to_change_time.set()
+
+@dp.message_handler(state=UserState.time_to_change_time)
+async def get_time(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_time(bot, message):
+        upload_result = test.upload_time(bot, message)
+        await state.update_data(time_to_change_time=upload_result)
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_change_time.set()
+    else:
+        await message.answer(MESSAGES['choose_time_change'])
+        await UserState.time_to_change_time.set()
+
+@dp.message_handler(state=UserState.number_to_change_time)
+async def get_number(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_number(bot, message):
+        upload_result = test.upload_number(bot, message)
+        await state.update_data(number_to_change_time=upload_result)
+        await message.answer(MESSAGES['choose_fio_change'])
+        await UserState.fio_to_change_time.set()
+    else:
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_change_time.set()
+
+
+@dp.message_handler(state=UserState.fio_to_change_time)
+async def get_fio(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    else:
+        await state.update_data(fio_to_change_time=message.text)
+        await message.answer(MESSAGES['choose_place'])
+        await UserState.place_to_change_time.set()
+
+@dp.message_handler(state=UserState.place_to_change_time)
+async def get_place(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    else:
+        await state.update_data(place_to_work_time=message.text)
+        await message.answer(MESSAGES['get_comments'])
+        await UserState.comments_to_change_time.set()
+
+@dp.message_handler(state=UserState.comments_to_change_time)
+async def get_comments(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    else:
+        await state.update_data(comments_time=message.text)
+        data = await state.get_data()
+        await message.answer(MESSAGES['to_chat_send_message'])
+        await bot.send_message(id_chanel, f"Изменение времени смены\n"
+                             f"Дата: {data['date_to_change_time']}\n"
+                             f"Время: {data['time_to_change_time']}\n"
+                             f"Бейдж сотрудника: {data['number_to_change_time']}\n"
+                             f"Сотрудник: {data['fio_to_change_time']}\n"
+                             f"Магазин: {data['place_to_work_time']}\n"
+                             f"Комментарии: {data['comments_time']}\n")
+        await state.finish()
+        await start(message)
+
+
+
+@dp.message_handler(state=UserState.date_to_day_off)
+async def get_time(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_date(bot, message):
+        upload_result = test.upload_date(bot, message)
+        await state.update_data(date_to_day_off=upload_result)
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_day_off.set()
+    else:
+        await message.answer(MESSAGES['choose_day_change_correct'])
+        await UserState.date_to_day_off.set()
+
+
+@dp.message_handler(state=UserState.number_to_day_off)
+async def get_number(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    elif test.upload_number(bot, message):
+        upload_result = test.upload_number(bot, message)
+        await state.update_data(number_to_day_off=upload_result)
+        await message.answer(MESSAGES['choose_fio_change'])
+        await UserState.fio_to_day_off.set()
+    else:
+        await message.answer(MESSAGES['choose_number_change'])
+        await UserState.number_to_day_off.set()
+
+@dp.message_handler(state=UserState.fio_to_day_off)
+async def get_fio(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    else:
+        await state.update_data(fio_to_day_off=message.text)
+        await message.answer(MESSAGES['choose_place'])
+        await UserState.place_to_day_off.set()
+
+@dp.message_handler(state=UserState.place_to_day_off)
+async def get_place(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+        await state.finish()
+    else:
+        await state.update_data(place_to_day_off=message.text)
+        await message.answer(MESSAGES['get_comments'])
+        await UserState.comments_to_day_off.set()
+
+@dp.message_handler(state=UserState.comments_to_day_off)
+async def get_comments_day_off(message: types.Message, state: FSMContext):
+    if message.text == 'Назад в меню':
+        await start(message)
+
+    else:
+        await state.update_data(comments_to_day_off=message.text)
+        data = await state.get_data()
+        await message.answer(MESSAGES['to_chat_send_message'])
+        await bot.send_message(id_chanel, f"Выходной\n"
+                             f"Дата: {data['date_to_day_off']}\n"
+                             f"Бейдж сотрудника: {data['number_to_day_off']}\n"
+                             f"Сотрудник: {data['fio_to_day_off']}\n"
+                             f"Магазин: {data['place_to_day_off']}\n"
+                             f"Комментарии: {data['comments_to_day_off']}\n")
+
+
+
+        await start(message)
+        await state.finish()
+
 
 if __name__ == '__main__':
-    bot.polling(none_stop=True)
+    executor.start_polling(dp)
+

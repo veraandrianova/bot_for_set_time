@@ -1,0 +1,22 @@
+from aiogram.dispatcher.filters.state import State, StatesGroup
+
+class UserState(StatesGroup):
+    date_to_change = State()
+    time_to_change = State()
+    number_to_change = State()
+    fio_to_change = State()
+    number_to_work = State()
+    fio_to_work = State()
+    place_to_change = State()
+    comments_to_change= State()
+    date_to_change_time = State()
+    time_to_change_time = State()
+    number_to_change_time = State()
+    fio_to_change_time = State()
+    place_to_change_time = State()
+    comments_to_change_time = State()
+    date_to_day_off = State()
+    number_to_day_off = State()
+    fio_to_day_off = State()
+    place_to_day_off = State()
+    comments_to_day_off = State()
