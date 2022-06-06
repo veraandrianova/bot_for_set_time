@@ -130,13 +130,13 @@ async def get_comments(message: types.Message, state: FSMContext):
         data = await state.get_data()
         await message.answer(MESSAGES['to_chat_send_message'])
         await bot.send_message(id_chanel, f"Замена\n"
+                             f"Магазин: {data['place_to_work']}\n"
                              f"Дата: {data['date_to_change']}\n"
                              f"Время: {data['time_to_change']}\n"
                              f"Бейдж сотрудника, у которого выходной: {data['number_to_change']}\n"
                              f"Сотрудник, у которого выходной: {data['fio_to_change']}\n"
                              f"Бейдж сотрудника, который будет работать: {data['number_to_work']}\n"
                              f"Сотрудник, который будет работать: {data['fio_to_work']}\n"
-                             f"Магазин: {data['place_to_work']}\n"
                              f"Комментарии: {data['comments']}\n")
         await state.finish()
         await start(message)
@@ -214,11 +214,11 @@ async def get_comments(message: types.Message, state: FSMContext):
         data = await state.get_data()
         await message.answer(MESSAGES['to_chat_send_message'])
         await bot.send_message(id_chanel, f"Изменение времени смены\n"
+                             f"Магазин: {data['place_to_work_time']}\n"
                              f"Дата: {data['date_to_change_time']}\n"
                              f"Время: {data['time_to_change_time']}\n"
                              f"Бейдж сотрудника: {data['number_to_change_time']}\n"
                              f"Сотрудник: {data['fio_to_change_time']}\n"
-                             f"Магазин: {data['place_to_work_time']}\n"
                              f"Комментарии: {data['comments_time']}\n")
         await state.finish()
         await start(message)
@@ -284,10 +284,10 @@ async def get_comments_day_off(message: types.Message, state: FSMContext):
         data = await state.get_data()
         await message.answer(MESSAGES['to_chat_send_message'])
         await bot.send_message(id_chanel, f"Выходной\n"
+                             f"Магазин: {data['place_to_day_off']}\n"
                              f"Дата: {data['date_to_day_off']}\n"
                              f"Бейдж сотрудника: {data['number_to_day_off']}\n"
                              f"Сотрудник: {data['fio_to_day_off']}\n"
-                             f"Магазин: {data['place_to_day_off']}\n"
                              f"Комментарии: {data['comments_to_day_off']}\n")
 
 
