@@ -17,7 +17,7 @@ async def client_choose(message: types.Message):
     if message.text == 'Замена':
         await message.answer(MESSAGES['choose_day_change'], reply_markup=kb.catalog_keyboard)
         await UserState.date_to_change.set()
-    elif message.text == 'Изменение времени смены':
+    elif message.text == 'Изменить/добавить смену':
         catalog_keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         back_button = types.KeyboardButton(text='Назад в меню')
         catalog_keyboard.add(back_button)
@@ -213,7 +213,7 @@ async def get_comments(message: types.Message, state: FSMContext):
         await state.update_data(comments_time=message.text)
         data = await state.get_data()
         await message.answer(MESSAGES['to_chat_send_message'])
-        await bot.send_message(id_chanel, f"Изменение времени смены\n"
+        await bot.send_message(id_chanel, f"Изменить/добавить смену\n"
                              f"Магазин: {data['place_to_work_time']}\n"
                              f"Дата: {data['date_to_change_time']}\n"
                              f"Время: {data['time_to_change_time']}\n"
